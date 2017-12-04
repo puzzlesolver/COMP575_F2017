@@ -272,7 +272,7 @@ void poseHandler(const std_msgs::String::ConstPtr &message)
     float avg_x = 0;
     float avg_y = 0;
     int i=0;
-    float new_new_local_position;
+    float new_local_position;
 
     neighbors.clear();
     for (i = 0; i<6; i++){
