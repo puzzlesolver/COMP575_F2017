@@ -20,7 +20,7 @@
 #include <std_msgs/Float32.h>
 #include "Pose.h"
 #include "TargetState.h"
-#define KP 1
+#define KP 0.3
 
 // Custom messages
 #include <shared_messages/TagsImage.h>
@@ -169,7 +169,7 @@ void mobilityStateMachine(const ros::TimerEvent &)
         {
             state_machine_msg.data = "TRANSLATING";//, " + converter.str();
             float angular_velocity = new_angular_velocity;
-            float linear_velocity = 0.2;
+            float linear_velocity = 0.02;
             setVelocity(linear_velocity, angular_velocity);
             break;
         }
