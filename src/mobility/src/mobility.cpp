@@ -271,21 +271,23 @@ void poseHandler(const std_msgs::String::ConstPtr &message)
     float y_distance = 0;
     float avg_x = 0;
     float avg_y = 0;
-    int i=0;
+    int i = 0;
+    int n_count = 0;
     float new_local_position;
 
     neighbors.clear();
     for (i = 0; i<6; i++){
         if(i != my_index)
-            if(hypot(my_pose.x - all_rovers[i].x, my_pose.y - all_rovers[i].y)<2){
+            if(hypot(my_pose.x - all_rovers[i].x, my_pose.y - all_rovers[i].y)<10){
                 x_distance += all_rovers[i].x - current_location.x;
                 y_distance += all_rovers[i].y - current_location.y;
                 neighbors.push_back(all_rovers[i]);
+		n_count++;
             }
         }
 
-avg_x = current_location.x + x_distance/i;
-avg_y = current_location.y + y_distance/i;
+avg_x = current_location.x + x_distance/(n_count -1);
+avg_y = current_location.y + y_distance/(n_count -1);
 new_local_position = atan2(avg_y, avg_x);
 new_angular_velocity = KP*(new_local_position - current_location.theta);
 };
