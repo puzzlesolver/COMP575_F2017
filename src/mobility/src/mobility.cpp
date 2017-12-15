@@ -481,3 +481,4 @@ void calculate_neighbors(string rover_name){
      local_average_heading = atan2(u_y,u_x);
      return local_average_heading;
     }
+/
