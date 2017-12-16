@@ -292,6 +292,108 @@ new_local_position = atan2(avg_y, avg_x);
 new_angular_velocity = KP*(new_local_position - current_location.theta);
 };
 
+void initialization(string msg){
+   string incoming_rover_name;
+   incoming_rover_name = get_rover_name_from_message(msg);
+   if(incoming_rover_name.compare("ajax") == 0){
+      if(w[0].init == false){
+         w[0].init == true;
+	 w[0].leader = -1;
+	 w[0].my_id = 0;
+	 w[0].max_id = 0;
+	 w[0].count = 0;
+      }
+   }else if(incoming_rover_name.compare("aeneas") == 0){
+      if(w[1].init == false){
+         w[1].init == true;
+	 w[1].leader = -1;
+	 w[1].my_id = 1;
+	 w[1].max_id = 1;
+	 w[1].count = 0;
+      }
+   }else if(incoming_rover_name.compare("achilles") == 0){
+      if(w[2].init == false){
+         w[2].init == true;
+	 w[2].leader = -1;
+	 w[2].my_id = 2;
+	 w[2].max_id = 2;
+	 w[2].count = 0;
+      }
+   }else if(incoming_rover_name.compare("diomedes") == 0){
+      if(w[3].init == false){
+         w[3].init == true;
+	 w[3].leader = -1;
+	 w[3].my_id = 3;
+	 w[3].max_id = 3;
+	 w[3].count = 0;
+      }
+   }else if(incoming_rover_name.compare("hector") == 0){
+      if(w[4].init == false){
+         w[4].init == true;
+	 w[4].leader = -1;
+	 w[4].my_id = 4;
+	 w[4].max_id = 4;
+	 w[4].count = 0;
+      }
+   }else if(incoming_rover_name.compare("paris") == 0){
+      if(w[5].init == false){
+         w[5].init == true;
+	 w[5].leader = -1;
+	 w[5].my_id = 5;
+	 w[5].max_id = 5;
+	 w[5].count = 0;
+      }
+   }else{
+      cout << "We Missed Something!";
+   }
+}
+
+int msg(processor w, int i){
+   return w.max_id;
+}
+
+void publish_incoming_processor(string rover_name){
+   processor my_state;
+   int my_index;
+   if(rover_name.compare("ajax") == 0){
+      my_state = w[0];
+      my_index = 0;
+   }else if(rover_name.compare("aeneas") == 0){
+      my_state = w[1];
+      my_index = 1;
+   }else if(rover_name.compare("achilles") == 0){
+      my_state = w[2];
+      my_index = 2;
+   }else if(rover_name.compare("diomedes") == 0){
+      my_state = w[3];
+      my_index = 3;
+   }else if(rover_name.compare("hector") == 0){
+      my_state = w[4];
+      my_index = 4;
+   }else if(rover_name.compare("paris") == 0){
+      my_state = w[5];
+      my_index = 5;
+   }else{
+      my_state = w[0];
+   }
+   std_msgs::String leader_message;
+   std::stringstream converter2;
+   converter2 << rover_name << "," << "my_id:" << my_state.my_id << "," << "max_id:" << my_state.max_id << "," << "leader:" << my_state.leader << "," <<
+   leader_message.data = converter2.str();
+   localMaxPublisher.publish(leader_message);
+   w[my_index].max_id = msg(my_state, my_index);
+   neighbor_max.clear();
+   for(int i = 0; i < 6; i++){
+      if(i != my_index){
+         if(hypot(current_location.x-all_rovers[i].x, current_location.y-all_rovers[i].y) < 2){
+	    neighbor_max.push_back(w[i].max_id);
+	 }
+      }
+   }
+   int max2 =*max_element(neighbor_max.begin(), neighbor_max.end());
+   w[my_index] = stf(w[my_index], max2); 
+}
+
   void obstacleHandler(const std_msgs::UInt8::ConstPtr &message)
   {
      if ( message->data > 0 )
@@ -481,4 +583,18 @@ void calculate_neighbors(string rover_name){
      local_average_heading = atan2(u_y,u_x);
      return local_average_heading;
     }
-/
+
+processor stf(processor w, int max2){
+   w.max_id = max(w.max_id,max2);
+   if(w.count < diam){
+      w.leader = -1;
+   }
+   else if(w.count >= diam && w.max_id == w.my_id){
+      w.leader = 1;
+   }
+   else if(w.count >= diam && w.max_id > w.my_id){
+      w.leader = 0;
+   }
+   w.count += 1;
+   return w;
+}
